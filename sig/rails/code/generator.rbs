@@ -1,0 +1,13 @@
+module Rails
+  module Code
+    module Generator
+      VERSION: String
+
+      class Error < StandardError
+      end
+
+      class Railtie < ::Rails::Railtie
+      end
+    end
+  end
+end

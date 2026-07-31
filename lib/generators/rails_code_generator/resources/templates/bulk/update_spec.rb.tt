@@ -1,0 +1,26 @@
+# frozen_string_literal: true
+
+require "rails_helper"
+
+RSpec.describe "[PATCH] /<%= route_path %>/:id", type: :request do
+  Given(:path)          { "/<%= route_path %>/" + <%= singular_name %>.id.to_s }
+  Given(:<%= singular_name %>) { create :<%= singular_name %> }
+  Given(:user)          { create :user }
+
+  context "with authenticated user & valid params" do
+    Given(:params) {
+      {
+        <%= table_name %>: {
+          name: "Changed <%= singular_name %> name",
+        },
+      }.to_json
+    }
+
+    When { patch path, params: params, headers: api_auth_headers(user) }
+
+    Then { expect(response).to be_successful }
+    And  { expect(response_body[:data]).not_to be_empty }
+    And  { expect(response_body[:errors]).to be_empty }
+    And  { expect(response_body.dig(:data, :name)).to eq "Changed <%= singular_name %> name" }
+  end
+end

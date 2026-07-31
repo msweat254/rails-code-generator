@@ -1,0 +1,23 @@
+# frozen_string_literal: true
+
+module <%= resource_module_name %>
+  class Save
+    attr_accessor :<%= singular_name %>
+
+    def self.call <%= singular_name %>
+      return if <%= singular_name %>.nil?
+
+      new(<%= singular_name %>).call
+    end
+
+    def initialize <%= singular_name %>
+      self.<%= singular_name %> = <%= singular_name %>
+    end
+
+    def call
+      <%= singular_name %>.save!
+
+      <%= singular_name %>
+    end
+  end
+end

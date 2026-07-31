@@ -1,0 +1,11 @@
+# frozen_string_literal: true
+
+module <%= resource_module_name %>
+  class CreateValidator < BaseValidator
+    params do
+      required(:<%= singular_name %>).maybe :hash do
+        # TODO: add attributes
+      end
+    end
+  end
+end

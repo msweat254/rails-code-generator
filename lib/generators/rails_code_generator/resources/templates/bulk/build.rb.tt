@@ -1,0 +1,38 @@
+# frozen_string_literal: true
+
+module <%= resource_module_name %>
+  class Build
+    PERMITTED_ATTRIBUTES = [
+    ].freeze
+
+    def self.call params
+      return if params.blank?
+
+      new(params).call
+    end
+
+    def initialize params
+      self.params = ServiceHelpers::CleanBuildParams.call(
+        params:               params,
+        permitted_attributes: PERMITTED_ATTRIBUTES,
+      )
+    end
+
+    def call
+      <%= table_name %> = params.map do |param|
+        ::<%= class_name %>.new param
+      end
+
+      Current.set_previous_and_current_entities(
+        previous_entities: [],
+        current_entities:  <%= table_name %>,
+      )
+
+      <%= table_name %>
+    end
+
+    private
+
+    attr_accessor :params
+  end
+end

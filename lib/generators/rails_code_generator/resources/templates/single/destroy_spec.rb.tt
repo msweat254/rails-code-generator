@@ -1,0 +1,16 @@
+# frozen_string_literal: true
+
+require "rails_helper"
+
+RSpec.describe "[DELETE] /<%= route_path %>/:id", type: :request do
+  Given(:path) { "/<%= route_path %>/#{<%= singular_name %>.id}" }
+  Given(:user) { create :user }
+  Given(:<%= singular_name %>) { create :<%= singular_name %> }
+
+  context "with authenticated user" do
+    When { delete path, headers: api_auth_headers(user) }
+
+    Then { expect(response_body[:errors]).to be_empty }
+    And  { expect(response).to be_successful }
+  end
+end

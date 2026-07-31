@@ -1,0 +1,16 @@
+# frozen_string_literal: true
+
+require "rails_helper"
+
+RSpec.describe "[GET] /<%= route_path %>", type: :request do
+  Given(:path)  { "/<%= route_path %>" }
+  Given(:user)  { create :user }
+  Given(:<%= singular_name %>) { create :<%= singular_name %> }
+
+  context "with authenticated user and valid params" do
+    When { get path, headers: api_auth_headers(user) }
+
+    Then { expect(response_body[:data]).not_to be_empty }
+    And  { expect(response_body[:errors]).to be_empty }
+  end
+end

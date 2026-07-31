@@ -1,0 +1,28 @@
+# frozen_string_literal: true
+
+module <%= resource_module_name %>
+  class Build
+    PERMITTED_ATTRIBUTES = [
+    ].freeze
+
+    def self.call params
+      new(params).call
+    end
+
+    def initialize params
+      self.params = if params.is_a? ActionController::Parameters
+                      params.permit(*PERMITTED_ATTRIBUTES)
+                    else
+                      params.slice(*PERMITTED_ATTRIBUTES)
+                    end
+    end
+
+    def call
+      self.<%= singular_name %> = ::<%= class_name %>.new params
+    end
+
+    private
+
+    attr_accessor :<%= singular_name %>, :params
+  end
+end

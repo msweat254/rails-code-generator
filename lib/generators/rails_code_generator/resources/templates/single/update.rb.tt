@@ -1,0 +1,31 @@
+# frozen_string_literal: true
+
+module <%= resource_module_name %>
+  class Update
+    PERMITTED_ATTRIBUTES = [
+    ].freeze
+
+    def self.call <%= singular_name %>, params
+      new(<%= singular_name %>, params).call
+    end
+
+    def initialize <%= singular_name %>, params
+      self.<%= singular_name %> = <%= singular_name %>
+      self.params        = if params.is_a? ActionController::Parameters
+                           params.permit(*PERMITTED_ATTRIBUTES)
+                         else
+                           params.slice(*PERMITTED_ATTRIBUTES)
+                         end
+    end
+
+    def call
+      <%= singular_name %>.assign_attributes params
+
+      <%= singular_name %>
+    end
+
+    private
+
+    attr_accessor :<%= singular_name %>, :params
+  end
+end

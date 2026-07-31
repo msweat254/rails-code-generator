@@ -1,0 +1,24 @@
+# frozen_string_literal: true
+
+module <%= resource_module_name %>
+  class Save
+    attr_accessor :<%= table_name %>, :columns_to_update
+
+    def self.call <%= table_name %>:, columns_to_update: nil
+      return if <%= table_name %>.blank?
+
+      new(<%= table_name %>, columns_to_update).call
+    end
+
+    def initialize <%= table_name %>, columns_to_update
+      self.<%= table_name %>        = <%= table_name %>
+      self.columns_to_update = columns_to_update
+    end
+
+    def call
+      <%= class_name %>.import <%= table_name %>.to_a, on_duplicate_key_update: columns_to_update
+
+      <%= table_name %>
+    end
+  end
+end

@@ -1,0 +1,43 @@
+# frozen_string_literal: true
+
+module <%= resource_module_name %>
+  class Update
+    PERMITTED_ATTRIBUTES = [
+      :id,
+    ].freeze
+
+    def self.call params
+      return if params.blank?
+
+      new(params).call
+    end
+
+    def initialize params
+      self.params = ServiceHelpers::CleanUpdateParams.call(
+        params:               params,
+        permitted_attributes: PERMITTED_ATTRIBUTES,
+      )
+    end
+
+    def call
+      <%= table_name %> = <%= class_name %>.where id: params.keys
+
+      previous_<%= table_name %> = <%= table_name %>.map(&:dup)
+
+      <%= table_name %>.each do |<%= singular_name %>|
+        <%= singular_name %>.assign_attributes params[<%= singular_name %>.id]
+      end
+
+      Current.set_previous_and_current_entities(
+        previous_entities: previous_<%= table_name %>,
+        current_entities:  <%= table_name %>,
+      )
+
+      { <%= table_name %>: <%= table_name %>, columns_to_update: PERMITTED_ATTRIBUTES - [:id] }
+    end
+
+    private
+
+    attr_accessor :params
+  end
+end

@@ -1,0 +1,62 @@
+# frozen_string_literal: true
+
+class <%= resource_controller_class %> < ApplicationController
+  def index
+    <%= table_name %> = if params[:ids]
+                      <%= class_name %>.where id: params[:ids]
+                    else
+                      <%= class_name %>.all
+                    end
+
+    render json: <%= resource_normalizer_class %>.new(<%= table_name %>, params)
+  end
+
+  def show
+    <%= singular_name %> = <%= class_name %>.find params[:id]
+
+    render json: <%= resource_normalizer_class %>.new(<%= singular_name %>)
+  end
+
+  def create
+    validator = <%= resource_module_name %>::CreateValidator.call params
+    errors    = ValidationErrorFormatter.call validator
+
+    if errors.empty?
+      new_<%= table_name %> = <%= resource_module_name %>::Build.call <%= singular_name %>_params
+      <%= table_name %>     = <%= resource_module_name %>::Save.call <%= table_name %>: new_<%= table_name %>
+      Activities::Save.call "<%= class_name %>"
+    end
+
+    render json: <%= resource_normalizer_class %>.new(<%= table_name %>, { errors: errors })
+  end
+
+  def update
+    validator = <%= resource_module_name %>::UpdateValidator.call params
+    errors    = ValidationErrorFormatter.call validator
+
+    if errors.empty?
+      updated_<%= table_name %> = <%= resource_module_name %>::Update.call <%= singular_name %>_params
+
+      <%= table_name %> = <%= resource_module_name %>::Save.call(
+        <%= table_name %>:     updated_<%= table_name %>[:<%= table_name %>],
+        columns_to_update: updated_<%= table_name %>[:columns_to_update],
+      )
+      Activities::Save.call "<%= class_name %>"
+    end
+
+    render json: <%= resource_normalizer_class %>.new(<%= table_name %>, { errors: errors })
+  end
+
+  def destroy
+    <%= table_name %> = <%= class_name %>.where(id: params[:ids])&.destroy_all
+    Activities::Save.call "<%= class_name %>"
+
+    render json: <%= resource_normalizer_class %>.new(<%= table_name %>)
+  end
+
+  private
+
+  def <%= singular_name %>_params
+    params.require :<%= table_name %>
+  end
+end

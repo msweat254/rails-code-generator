@@ -1,0 +1,24 @@
+# frozen_string_literal: true
+
+require "rails_helper"
+
+RSpec.describe "[POST] /<%= route_path %>", type: :request do
+  Given(:path) { "/<%= route_path %>" }
+  Given(:user) { create :user }
+
+  context "with valid params" do
+    Given(:params) {
+      {
+        <%= singular_name %>: {
+          # TODO: add attributes
+        },
+      }.to_json
+    }
+
+    When { post path, params: params, headers: api_auth_headers(user) }
+
+    Then { expect(response).to be_successful }
+    And  { expect(response_body[:errors]).to be_empty }
+    And  { expect(response_body[:data]).not_to be_empty }
+  end
+end
