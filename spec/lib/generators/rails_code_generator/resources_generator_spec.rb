@@ -83,7 +83,7 @@ RSpec.describe RailsCodeGenerator::ResourcesGenerator do
 
       expect(create_spec).to include("pricing_config: {")
       expect(update_spec).to include("pricing_config: {")
-      expect(destroy_spec).to include('"/pricing_configs/" + pricing_config.id.to_s')
+      expect(destroy_spec).to include(%q(Given(:path) { "/pricing_configs/#{pricing_config.id}" }))
       expect(destroy_spec).to include("delete path, headers: api_auth_headers(user)")
       expect(destroy_spec).not_to include("ids: ids")
     end
