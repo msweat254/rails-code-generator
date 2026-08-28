@@ -11,7 +11,7 @@ RSpec.describe "[PATCH] /<%= route_path %>/:id", type: :request do
     Given(:params) {
       {
         <%= table_name %>: {
-          name: "Changed <%= singular_name %> name",
+<%= request_params_attributes_list %>
         },
       }.to_json
     }
@@ -21,6 +21,5 @@ RSpec.describe "[PATCH] /<%= route_path %>/:id", type: :request do
     Then { expect(response).to be_successful }
     And  { expect(response_body[:data]).not_to be_empty }
     And  { expect(response_body[:errors]).to be_empty }
-    And  { expect(response_body.dig(:data, :name)).to eq "Changed <%= singular_name %> name" }
   end
 end

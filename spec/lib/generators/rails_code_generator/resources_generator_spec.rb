@@ -170,6 +170,8 @@ RSpec.describe RailsCodeGenerator::ResourcesGenerator do
       update = read_generated("app/services/pricing_configs/update.rb")
       create_validator = read_generated("app/validators/pricing_configs/create_validator.rb")
       normalizer = read_generated("app/normalizers/pricing_configs_normalizer.rb")
+      create_spec = read_generated("spec/requests/pricing_configs/create_spec.rb")
+      update_spec = read_generated("spec/requests/pricing_configs/update_spec.rb")
 
       expect(build).to include(":name,")
       expect(build).to include(":amount,")
@@ -182,6 +184,10 @@ RSpec.describe RailsCodeGenerator::ResourcesGenerator do
       expect(normalizer).to include(":name,")
       expect(normalizer).to include(":amount,")
       expect(normalizer).not_to include("# TODO: add attributes")
+      expect(create_spec).to include("name: Faker::Lorem.word,")
+      expect(create_spec).to include("amount: Faker::Number.decimal(l_digits: 2),")
+      expect(update_spec).to include("name: Faker::Lorem.word,")
+      expect(update_spec).to include("amount: Faker::Number.decimal(l_digits: 2),")
     end
 
     it "includes id in bulk update permitted attributes" do

@@ -24,6 +24,24 @@ module Rails
           "uuid" => :string,
         }.freeze
 
+        FAKER_EXPRESSION_MAP = {
+          "string" => "Faker::Lorem.word",
+          "text" => "Faker::Lorem.paragraph",
+          "citext" => "Faker::Lorem.word",
+          "integer" => "Faker::Number.number(digits: 5)",
+          "bigint" => "Faker::Number.number(digits: 5)",
+          "float" => "Faker::Number.decimal(l_digits: 2).to_f",
+          "decimal" => "Faker::Number.decimal(l_digits: 2)",
+          "boolean" => "Faker::Boolean.boolean",
+          "date" => "Faker::Date.forward(days: 30)",
+          "datetime" => "Faker::Time.forward(days: 30)",
+          "timestamp" => "Faker::Time.forward(days: 30)",
+          "timestamptz" => "Faker::Time.forward(days: 30)",
+          "json" => "{}",
+          "jsonb" => "{}",
+          "uuid" => "Faker::Internet.uuid",
+        }.freeze
+
         def model_attributes
           @model_attributes ||= fetch_model_attributes
         end
@@ -34,8 +52,9 @@ module Rails
           format_symbol_list(names)
         end
 
-        def normalizer_attributes_list
+        def normalizer_attributes_list(include_id: false)
           names = model_attribute_names
+          names = [:id, *names] if include_id
           return "    # TODO: add attributes" if names.empty?
 
           format_symbol_list(names, indent: 4)
@@ -45,6 +64,13 @@ module Rails
           return "        # TODO: add attributes" if model_attributes.empty?
 
           model_attributes.map { |attribute| validator_line_for(attribute) }.join("\n")
+        end
+
+        def request_params_attributes_list(indent: 10)
+          padding = " " * indent
+          return "#{padding}# TODO: add attributes" if model_attributes.empty?
+
+          model_attributes.map { |attribute| "#{padding}#{attribute[:name]}: #{faker_expression_for(attribute)}," }.join("\n")
         end
 
         private
@@ -69,6 +95,10 @@ module Rails
           end
         end
 
+        def faker_expression_for(attribute)
+          FAKER_EXPRESSION_MAP.fetch(attribute[:type], "Faker::Lorem.word")
+        end
+
         def fetch_model_attributes
           klass = class_name.constantize
           return [] unless klass.respond_to?(:columns)
@@ -76,9 +106,12 @@ module Rails
           klass.columns.filter_map do |column|
             next if EXCLUDED_COLUMNS.include?(column.name)
 
+            type = column.type.to_s
+
             {
               name: column.name,
-              dry_type: DRY_TYPE_MAP[column.type.to_s],
+              type: type,
+              dry_type: DRY_TYPE_MAP[type],
             }
           end
         rescue StandardError

@@ -2,6 +2,6 @@
 
 class <%= resource_normalizer_class %> < BaseResponseNormalizer
   attributes(
-<%= normalizer_attributes_list %>
+<%= normalizer_attributes_list(include_id: true) %>
   )
 end

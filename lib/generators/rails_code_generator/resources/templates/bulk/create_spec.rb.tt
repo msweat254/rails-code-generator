@@ -10,7 +10,7 @@ RSpec.describe "[POST] /<%= route_path %>", type: :request do
     Given(:params) {
       {
         <%= table_name %>: {
-          # TODO: add attributes
+<%= request_params_attributes_list %>
         },
       }.to_json
     }

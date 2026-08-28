@@ -46,8 +46,8 @@ RSpec.describe Rails::Code::Generator::ModelAttributes do
 
       expect(helper.model_attributes).to eq(
         [
-          { name: "name", dry_type: :string },
-          { name: "amount", dry_type: :decimal },
+          { name: "name", type: "string", dry_type: :string },
+          { name: "amount", type: "decimal", dry_type: :decimal },
         ],
       )
     end
@@ -100,12 +100,19 @@ RSpec.describe Rails::Code::Generator::ModelAttributes do
         "        optional(:name).maybe :string\n        optional(:active).maybe :bool",
       )
     end
+
+    it "formats request params with Faker expressions by type" do
+      expect(helper.request_params_attributes_list).to eq(
+        "          name: Faker::Lorem.word,\n          active: Faker::Boolean.boolean,",
+      )
+    end
   end
 
   describe "fallback helpers" do
     it "falls back to TODO comments when attributes are unavailable" do
       expect(helper.normalizer_attributes_list).to eq("    # TODO: add attributes")
       expect(helper.validator_attributes_list).to eq("        # TODO: add attributes")
+      expect(helper.request_params_attributes_list).to eq("          # TODO: add attributes")
       expect(helper.permitted_attributes_list).to eq("")
       expect(helper.permitted_attributes_list(include_id: true)).to eq("      :id,")
     end
