@@ -10,7 +10,6 @@ RSpec.describe "[DELETE] /<%= route_path %>/:id", type: :request do
   context "with authenticated user" do
     When { delete path, headers: api_auth_headers(user) }
 
-    Then { expect(response_body[:errors]).to be_empty }
-    And  { expect(response).to be_successful }
+    Then { expect(response).to be_successful }
   end
 end

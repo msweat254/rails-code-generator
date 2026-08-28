@@ -4,7 +4,7 @@ module <%= resource_module_name %>
   class CreateValidator < BaseValidator
     params do
       required(:<%= table_name %>).maybe :hash do
-        # TODO: add attributes
+<%= validator_attributes_list %>
       end
     end
   end

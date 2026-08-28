@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "fileutils"
+require "ostruct"
 require "spec_helper"
 require "generators/rails_code_generator/resources/resources_generator"
 require "rails/generators/testing/behavior"
@@ -27,6 +28,7 @@ RSpec.describe RailsCodeGenerator::ResourcesGenerator do
       "app/services/pricing_configs/update.rb",
       "app/validators/pricing_configs/create_validator.rb",
       "app/validators/pricing_configs/update_validator.rb",
+      "app/normalizers/pricing_configs_normalizer.rb",
       "spec/requests/pricing_configs/index_spec.rb",
       "spec/requests/pricing_configs/show_spec.rb",
       "spec/requests/pricing_configs/create_spec.rb",
@@ -74,6 +76,13 @@ RSpec.describe RailsCodeGenerator::ResourcesGenerator do
 
       expect(create_validator).to include("required(:pricing_config).maybe :hash do")
       expect(update_validator).to include("required(:pricing_config).maybe :hash do")
+    end
+
+    it "generates the normalizer" do
+      content = read_generated("app/normalizers/pricing_configs_normalizer.rb")
+
+      expect(content).to include("class PricingConfigsNormalizer < BaseResponseNormalizer")
+      expect(content).to include("attributes(")
     end
 
     it "generates request specs with singular param keys and id in destroy path" do
@@ -134,6 +143,56 @@ RSpec.describe RailsCodeGenerator::ResourcesGenerator do
       expect(update_spec).to include("pricing_configs: {")
       expect(destroy_spec).to include('RSpec.describe "[DELETE] /pricing_configs", type: :request do')
       expect(destroy_spec).to include("params: { ids: ids }")
+    end
+  end
+
+  describe "model column introspection" do
+    before do
+      columns = [
+        OpenStruct.new(name: "id", type: :integer),
+        OpenStruct.new(name: "name", type: :string),
+        OpenStruct.new(name: "amount", type: :decimal),
+        OpenStruct.new(name: "created_at", type: :datetime),
+        OpenStruct.new(name: "updated_at", type: :datetime),
+      ]
+      stub_const(
+        "PricingConfig",
+        Class.new do
+          define_singleton_method(:columns) { columns }
+        end,
+      )
+    end
+
+    it "fills attributes from the model in single mode" do
+      run_generator ["PricingConfig"]
+
+      build = read_generated("app/services/pricing_configs/build.rb")
+      update = read_generated("app/services/pricing_configs/update.rb")
+      create_validator = read_generated("app/validators/pricing_configs/create_validator.rb")
+      normalizer = read_generated("app/normalizers/pricing_configs_normalizer.rb")
+
+      expect(build).to include(":name,")
+      expect(build).to include(":amount,")
+      expect(build).not_to include(":id,")
+      expect(build).not_to include(":created_at,")
+      expect(update).to include(":name,")
+      expect(update).not_to include(":id,")
+      expect(create_validator).to include("optional(:name).maybe :string")
+      expect(create_validator).to include("optional(:amount).maybe :decimal")
+      expect(normalizer).to include(":name,")
+      expect(normalizer).to include(":amount,")
+      expect(normalizer).not_to include("# TODO: add attributes")
+    end
+
+    it "includes id in bulk update permitted attributes" do
+      run_generator ["PricingConfig", "--bulk"]
+
+      update = read_generated("app/services/pricing_configs/update.rb")
+
+      expect(update).to include(":id,")
+      expect(update).to include(":name,")
+      expect(update).to include(":amount,")
+      expect(update).not_to include(":created_at,")
     end
   end
 end

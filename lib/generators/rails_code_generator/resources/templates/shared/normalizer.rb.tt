@@ -1,0 +1,7 @@
+# frozen_string_literal: true
+
+class <%= resource_normalizer_class %> < BaseResponseNormalizer
+  attributes(
+<%= normalizer_attributes_list %>
+  )
+end

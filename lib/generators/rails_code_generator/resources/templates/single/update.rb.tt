@@ -3,6 +3,7 @@
 module <%= resource_module_name %>
   class Update
     PERMITTED_ATTRIBUTES = [
+<%= permitted_attributes_list %>
     ].freeze
 
     def self.call <%= singular_name %>, params

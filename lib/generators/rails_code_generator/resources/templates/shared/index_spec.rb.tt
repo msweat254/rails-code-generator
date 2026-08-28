@@ -5,7 +5,7 @@ require "rails_helper"
 RSpec.describe "[GET] /<%= route_path %>", type: :request do
   Given(:path)  { "/<%= route_path %>" }
   Given(:user)  { create :user }
-  Given(:<%= singular_name %>) { create :<%= singular_name %> }
+  Given!(:<%= singular_name %>) { create :<%= singular_name %> }
 
   context "with authenticated user and valid params" do
     When { get path, headers: api_auth_headers(user) }

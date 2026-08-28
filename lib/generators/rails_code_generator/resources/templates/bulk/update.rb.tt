@@ -3,7 +3,7 @@
 module <%= resource_module_name %>
   class Update
     PERMITTED_ATTRIBUTES = [
-      :id,
+<%= permitted_attributes_list(include_id: true) %>
     ].freeze
 
     def self.call params

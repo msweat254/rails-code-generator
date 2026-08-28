@@ -2,6 +2,7 @@
 
 require_relative "generator/version"
 require_relative "generator/naming"
+require_relative "generator/model_attributes"
 
 module Rails
   module Code

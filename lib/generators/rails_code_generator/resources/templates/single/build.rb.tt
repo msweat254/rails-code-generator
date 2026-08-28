@@ -3,6 +3,7 @@
 module <%= resource_module_name %>
   class Build
     PERMITTED_ATTRIBUTES = [
+<%= permitted_attributes_list %>
     ].freeze
 
     def self.call params

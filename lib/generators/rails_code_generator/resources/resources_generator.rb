@@ -3,10 +3,12 @@
 require "rails/generators"
 require "rails/generators/named_base"
 require "rails/code/generator/naming"
+require "rails/code/generator/model_attributes"
 
 module RailsCodeGenerator
   class ResourcesGenerator < Rails::Generators::NamedBase
     include Rails::Code::Generator::Naming
+    include Rails::Code::Generator::ModelAttributes
 
     class_option :bulk, type: :boolean, default: false, desc: "Generate bulk endpoints"
 
@@ -27,6 +29,10 @@ module RailsCodeGenerator
                File.join("app/validators", table_name, "create_validator.rb")
       template "#{template_mode}/update_validator.rb",
                File.join("app/validators", table_name, "update_validator.rb")
+    end
+
+    def create_normalizer
+      template "shared/normalizer.rb", File.join("app/normalizers", "#{table_name}_normalizer.rb")
     end
 
     def create_request_specs
