@@ -29,6 +29,7 @@ RSpec.describe RailsCodeGenerator::ResourcesGenerator do
       "app/validators/pricing_configs/create_validator.rb",
       "app/validators/pricing_configs/update_validator.rb",
       "app/normalizers/pricing_configs_normalizer.rb",
+      "spec/factories/pricing_config.rb",
       "spec/requests/pricing_configs/index_spec.rb",
       "spec/requests/pricing_configs/show_spec.rb",
       "spec/requests/pricing_configs/create_spec.rb",
@@ -199,6 +200,71 @@ RSpec.describe RailsCodeGenerator::ResourcesGenerator do
       expect(update).to include(":name,")
       expect(update).to include(":amount,")
       expect(update).not_to include(":created_at,")
+    end
+  end
+
+  describe "model association introspection" do
+    before do
+      columns = [
+        OpenStruct.new(name: "id", type: :integer),
+        OpenStruct.new(name: "user_id", type: :integer),
+        OpenStruct.new(name: "location_id", type: :integer),
+        OpenStruct.new(name: "name", type: :string),
+        OpenStruct.new(name: "created_at", type: :datetime),
+        OpenStruct.new(name: "updated_at", type: :datetime),
+      ]
+      location_klass = Class.new do
+        define_singleton_method(:model_name) { OpenStruct.new(singular: "location") }
+      end
+      user_klass = Class.new do
+        define_singleton_method(:model_name) { OpenStruct.new(singular: "user") }
+      end
+      reflections = [
+        OpenStruct.new(
+          name: :user,
+          foreign_key: "user_id",
+          options: {},
+          klass: user_klass,
+        ),
+        OpenStruct.new(
+          name: :location,
+          foreign_key: "location_id",
+          options: {},
+          klass: location_klass,
+        ),
+      ]
+      stub_const(
+        "PricingConfig",
+        Class.new do
+          define_singleton_method(:columns) { columns }
+          define_singleton_method(:reflect_on_all_associations) { |_macro = nil| reflections }
+        end,
+      )
+    end
+
+    it "adds association Givens and uses association ids in create/update specs" do
+      run_generator ["PricingConfig"]
+
+      create_spec = read_generated("spec/requests/pricing_configs/create_spec.rb")
+      update_spec = read_generated("spec/requests/pricing_configs/update_spec.rb")
+      factory = read_generated("spec/factories/pricing_config.rb")
+
+      expect(create_spec).to include("Given(:location) { create :location }")
+      expect(create_spec).to include("location_id: location.id,")
+      expect(create_spec).to include("user_id: user.id,")
+      expect(create_spec).to include("name: Faker::Lorem.word,")
+      expect(create_spec.scan("Given(:user)").size).to eq(1)
+
+      expect(update_spec).to include("Given(:location) { create :location }")
+      expect(update_spec).to include("location_id: location.id,")
+      expect(update_spec).to include("user_id: user.id,")
+
+      expect(factory).to include("factory :pricing_config do")
+      expect(factory).to include("association  :user, factory: :user")
+      expect(factory).to include("association  :location, factory: :location")
+      expect(factory).to include("name { Faker::Lorem.word }")
+      expect(factory).not_to include("user_id")
+      expect(factory).not_to include("location_id")
     end
   end
 end

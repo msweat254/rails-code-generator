@@ -6,6 +6,7 @@ RSpec.describe "[PATCH] /<%= route_path %>/:id", type: :request do
   Given(:path)          { "/<%= route_path %>/" + <%= singular_name %>.id.to_s }
   Given(:<%= singular_name %>) { create :<%= singular_name %> }
   Given(:user)          { create :user }
+<%= request_spec_association_givens %>
 
   context "with authenticated user & valid params" do
     Given(:params) {

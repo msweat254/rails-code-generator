@@ -5,6 +5,7 @@ require "rails_helper"
 RSpec.describe "[POST] /<%= route_path %>", type: :request do
   Given(:path) { "/<%= route_path %>" }
   Given(:user) { create :user }
+<%= request_spec_association_givens %>
 
   context "with valid params" do
     Given(:params) {

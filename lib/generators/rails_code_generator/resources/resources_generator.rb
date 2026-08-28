@@ -35,6 +35,10 @@ module RailsCodeGenerator
       template "shared/normalizer.rb", File.join("app/normalizers", "#{table_name}_normalizer.rb")
     end
 
+    def create_factory
+      template "shared/factory.rb", File.join("spec/factories", "#{singular_name}.rb")
+    end
+
     def create_request_specs
       template "shared/index_spec.rb", File.join("spec/requests", table_name, "index_spec.rb")
       template "shared/show_spec.rb", File.join("spec/requests", table_name, "show_spec.rb")
